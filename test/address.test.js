@@ -397,3 +397,49 @@ describe('DELETE /api/contacts/:contactId/addresses/:addressId', () => {
     expect(response.body.errors).toBeDefined();
   });
 });
+
+describe('GET /api/contacts/:contactId/addresses', () => {
+  beforeEach(async () => {
+    await createUser();
+    await createContact();
+    await createAddress();
+  });
+
+  afterEach(async () => {
+    await removeAllAddresses();
+    await removeAllContacts();
+    await removeUser();
+  });
+
+  it('should can get list of addresses', async () => {
+    const contact = await getContact();
+
+    const response = await supertest(web)
+      .get('/api/contacts/' + contact.id + '/addresses')
+      .set('Authorization', 'test');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.length).toBe(1);
+  });
+
+  it('should reject get list of addresses if contact not found', async () => {
+    const contact = await getContact();
+
+    const response = await supertest(web)
+      .get('/api/contacts/' + (contact.id + 1) + '/addresses')
+      .set('Authorization', 'test');
+
+    expect(response.status).toBe(404);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should reject get list of addresses if unauthorized', async () => {
+    const contact = await getContact();
+
+    const response = await supertest(web)
+      .get('/api/contacts/' + contact.id + '/addresses');
+
+    expect(response.status).toBe(401);
+    expect(response.body.errors).toBeDefined();
+  });
+})

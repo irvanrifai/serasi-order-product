@@ -192,3 +192,144 @@ describe('GET /api/contacts/:contactId/addresses/:addressId', () => {
     expect(response.body.errors).toBeDefined;
   });
 });
+
+describe('PUT /api/contacts/:contactId/addresses/:addressId', () => {
+  beforeEach(async () => {
+    await createUser();
+    await createContact();
+    await createAddress();
+  });
+  
+  afterEach(async () => {
+    await removeAllAddresses();
+    await removeAllContacts();
+    await removeUser();
+  });
+
+  it('should can update address', async () => {
+    const contact = await getContact();
+    const address = await getAddress();
+
+    const addressData = {
+      street: 'Jalan Sudirman',
+      city: 'Jakarta',
+      province: 'DKI Jakarta',
+      country: 'Indonesia',
+      postal_code: '12345',
+    };
+
+    const response = await supertest(web)
+      .put('/api/contacts/' + contact.id + '/addresses/' + address.id)
+      .set('Authorization', 'test')
+      .send(addressData);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.street).toBe(addressData.street);
+    expect(response.body.data.city).toBe(addressData.city);
+    expect(response.body.data.province).toBe(addressData.province);
+    expect(response.body.data.country).toBe(addressData.country);
+    expect(response.body.data.postal_code).toBe(addressData.postal_code);
+  });
+  
+  it('should can update address even only country and postal code fulfilled', async () => {
+    const contact = await getContact();
+    const address = await getAddress();
+
+    const addressData = {
+      country: 'Indonesia',
+      postal_code: '12345',
+    };
+
+    const response = await supertest(web)
+      .put('/api/contacts/' + contact.id + '/addresses/' + address.id)
+      .set('Authorization', 'test')
+      .send(addressData);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.country).toBe(addressData.country);
+    expect(response.body.data.postal_code).toBe(addressData.postal_code);
+  });
+  
+  it('should reject update address if request is invalid', async () => {
+    const contact = await getContact();
+    const address = await getAddress();
+
+    const addressData = {
+      street: '',
+      city: '',
+      province: '',
+      country: '',
+      postal_code: '',
+    };
+
+    const response = await supertest(web)
+      .put('/api/contacts/' + contact.id + '/addresses/' + address.id)
+      .set('Authorization', 'test')
+      .send(addressData);
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toBeDefined();
+  });
+  
+  it('should reject update address if address not found', async () => {
+    const contact = await getContact();
+    const address = await getAddress();
+
+    const addressData = {
+      street: 'Jalan Sudirman',
+      city: 'Jakarta',
+      province: 'DKI Jakarta',
+      country: 'Indonesia',
+      postal_code: '12345',
+    };
+
+    const response = await supertest(web)
+      .put('/api/contacts/' + contact.id + '/addresses/' + (address.id + 1))
+      .set('Authorization', 'test')
+      .send(addressData);
+
+    expect(response.status).toBe(404);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should reject update address if contact not found', async () => {
+    const contact = await getContact();
+    const address = await getAddress();
+
+    const addressData = {
+      street: 'Jalan Sudirman',
+      city: 'Jakarta',
+      province: 'DKI Jakarta',
+      country: 'Indonesia',
+      postal_code: '12345',
+    };
+
+    const response = await supertest(web)
+      .put('/api/contacts/' + (contact.id + 1) + '/addresses/' + address.id)
+      .set('Authorization', 'test')
+      .send(addressData);
+
+    expect(response.status).toBe(404);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should reject update address if unauthorized', async () => {
+    const contact = await getContact();
+    const address = await getAddress();
+
+    const addressData = {
+      street: 'Jalan Sudirman',
+      city: 'Jakarta',
+      province: 'DKI Jakarta',
+      country: 'Indonesia',
+      postal_code: '12345',
+    };
+
+    const response = await supertest(web)
+      .put('/api/contacts/' + contact.id + '/addresses/' + address.id)
+      .send(addressData);
+
+    expect(response.status).toBe(401);
+    expect(response.body.errors).toBeDefined();
+  });
+});

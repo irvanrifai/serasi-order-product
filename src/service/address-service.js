@@ -4,8 +4,9 @@ import { createAddressValidation, getAddressValidation } from "../validation/add
 import { getContactValidation } from "../validation/contact-validation"
 import { validate } from "../validation/validation.js"
 
-const create = async (user, contactId, request) => {
+const checkContactExist = async (user, contactId) => {
   contactId = validate(getContactValidation, contactId);
+
   const contactExist = await prismaClient.contact.count({
     where: {
       username: user.username,
@@ -13,10 +14,15 @@ const create = async (user, contactId, request) => {
     }
   });
 
-  if (contactExist === 0) {
+  if (contactExist !== 1) {
     throw new ResponseError(404, "Contact is not found");
   }
 
+  return contactId;
+};
+
+const create = async (user, contactId, request) => {
+  contactId = await checkContactExist(user, contactId);
   const address = validate(createAddressValidation, request);
   address.contact_id = contactId;
 
@@ -34,19 +40,8 @@ const create = async (user, contactId, request) => {
 }
 
 const get = async (user, contactId, addressId) => {
-  contactId = validate(getContactValidation, contactId);
+  contactId = await checkContactExist(user, contactId);
   addressId = validate(getAddressValidation, addressId);
-
-  const contactExist = await prismaClient.contact.count({
-    where: {
-      username: user.username,
-      id: contactId
-    }
-  });
-
-  if (contactExist === 0) {
-    throw new ResponseError(404, "Contact is not found");
-  }
 
   const address = await prismaClient.address.findFirst({
     where: {

@@ -333,3 +333,67 @@ describe('PUT /api/contacts/:contactId/addresses/:addressId', () => {
     expect(response.body.errors).toBeDefined();
   });
 });
+
+describe('DELETE /api/contacts/:contactId/addresses/:addressId', () => {
+  beforeEach(async () => {
+    await createUser();
+    await createContact();
+    await createAddress();
+  });
+
+  afterEach(async () => {
+    await removeAllAddresses();
+    await removeAllContacts();
+    await removeUser();
+  });
+
+  it('should can delete address', async () => {
+    const contact = await getContact();
+    let address = await getAddress();
+
+    const response = await supertest(web)
+      .delete('/api/contacts/' + contact.id + '/addresses/' + address.id)
+      .set('Authorization', 'test');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toBe('OK');
+
+    address = await getAddress();
+    expect(address).toBeNull();
+  });
+
+  it('should reject delete address if address not found', async () => {
+    const contact = await getContact();
+    let address = await getAddress();
+
+    const response = await supertest(web)
+      .delete('/api/contacts/' + contact.id + '/addresses/' + (address.id + 1))
+      .set('Authorization', 'test');
+
+    expect(response.status).toBe(404);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should reject delete address if contact not found', async () => {
+    const contact = await getContact();
+    let address = await getAddress();
+
+    const response = await supertest(web)
+      .delete('/api/contacts/' + (contact.id + 1) + '/addresses/' + address.id)
+      .set('Authorization', 'test');
+
+    expect(response.status).toBe(404);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should reject delete address if unauthorized', async () => {
+    const contact = await getContact();
+    let address = await getAddress();
+
+    const response = await supertest(web)
+      .delete('/api/contacts/' + contact.id + '/addresses/' + address.id);
+
+    expect(response.status).toBe(401);
+    expect(response.body.errors).toBeDefined();
+  });
+});

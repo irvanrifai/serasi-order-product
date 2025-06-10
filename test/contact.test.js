@@ -302,3 +302,47 @@ describe('GET /api/contacts', () => {
     expect(response.body.errors).toBeDefined();
   });
 });
+
+describe('DELETE /api/contacts/:contactId', () => {
+  beforeEach(async () => {
+    await createUser();
+    await createContact();
+  });
+
+  afterEach(async () => {
+    await removeAllContacts();
+    await removeUser();
+  });
+
+  it('should delete contact', async () => {
+    const contact = await getContact();
+    const response = await supertest(web)
+      .delete('/api/contacts/' + contact.id)
+      .set('Authorization', 'test');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toBe('OK');
+
+    const contactAfterDelete = await getContact();
+    expect(contactAfterDelete).toBeNull();
+  });
+
+  it('should reject if contact not found', async () => {
+    const contact = await getContact();
+    const response = await supertest(web)
+      .delete('/api/contacts/' + (contact.id + 1))
+      .set('Authorization', 'test');
+
+    expect(response.status).toBe(404);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should reject if unauthorized', async () => {
+    const contact = await getContact();
+    const response = await supertest(web)
+      .delete('/api/contacts/' + contact.id);
+
+    expect(response.status).toBe(401);
+    expect(response.body.errors).toBeDefined();
+  });
+});

@@ -142,9 +142,31 @@ const search = async (user, request) => {
   }
 }
 
+const remove = async (user, contactId) => {
+  contactId = validate(getContactValidation, contactId);
+
+  const contactExist = await prismaClient.contact.count({
+    where: {
+      username: user.username,
+      id: contactId
+    }
+  });
+
+  if (contactExist === 0) {
+    throw new ResponseError(404, "contact is not found");
+  }
+
+  return prismaClient.contact.delete({
+    where: {
+      id: contactId
+    }
+  });
+}
+
 export default {
   create,
   get,
   update,
-  search
+  search,
+  remove
 }

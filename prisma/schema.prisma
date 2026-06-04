@@ -27,11 +27,14 @@ enum OrderStatus {
 }
 
 model User {
-  id         String   @id @default(uuid())
+  id         Int      @id @default(autoincrement())
   name       String
+  username   String   @unique
   email      String   @unique
   password   String
+  phone      String?
   role       Role     @default(CUSTOMER)
+  token      String?  @db.Char(150)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   is_deleted Boolean  @default(false)
@@ -41,17 +44,18 @@ model User {
   orders   Order[]   @relation("CustomerOrders")
 
   @@index([email])
+  @@index([username])
   @@map("users")
 }
 
 model Product {
-  id          String   @id @default(uuid())
+  id          Int      @id @default(autoincrement())
   sku         String   @unique
   name        String
   description String?
   price       Float
   stock       Int
-  merchant_id String
+  merchant_id Int
   merchant    User     @relation("MerchantProducts", fields: [merchant_id], references: [id])
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
@@ -66,9 +70,9 @@ model Product {
 }
 
 model Order {
-  id      String @id @default(uuid())
-  user_id String
-  user    User   @relation("CustomerOrders", fields: [user_id], references: [id])
+  id      Int  @id @default(autoincrement())
+  user_id Int
+  user    User @relation("CustomerOrders", fields: [user_id], references: [id])
 
   total_price     Float
   admin_fee       Float       @default(0)
@@ -86,10 +90,10 @@ model Order {
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  order_id   String
+  id         Int      @id @default(autoincrement())
+  order_id   Int
   order      Order    @relation(fields: [order_id], references: [id])
-  product_id String?
+  product_id Int?
   product    Product? @relation(fields: [product_id], references: [id])
   quantity   Int
   price      Float

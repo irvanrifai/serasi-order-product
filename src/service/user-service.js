@@ -46,9 +46,12 @@ const login = async (request) => {
       ],
     },
     select: {
+      id: true,
+      name: true,
       username: true,
       email: true,
       password: true,
+      role: true,
     },
   });
 
@@ -67,6 +70,7 @@ const login = async (request) => {
   const jwtSecret = process.env.JWT_SECRET_KEY;
   const token = jwt.sign(
     {
+      id: user.id,
       name: user.name,
       username: user.username,
       role: user.role,

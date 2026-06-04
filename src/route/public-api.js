@@ -9,7 +9,7 @@ publicRouter.get("/api/health", (req, res) => {
 });
 
 // public route
-publicRouter.post("/api/users", userController.register);
+publicRouter.post("/api/users/register", userController.register);
 publicRouter.post("/api/users/login", userController.login);
 
 export {

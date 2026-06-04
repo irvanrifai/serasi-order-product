@@ -1,8 +1,8 @@
-import express from "express"
+import express from "express";
 import userController from "../controller/user-controller.js";
-import contactController from "../controller/contact-controller.js";
+import productController from "../controller/product-controller.js";
 import { authMiddleware } from "../middleware/auth-middleware.js";
-import addressController from "../controller/address-controller.js";
+import { rbacMiddleware } from "../middleware/rbac-middleware.js";
 
 const userRouter = new express.Router();
 userRouter.use(authMiddleware);
@@ -11,20 +11,23 @@ userRouter.use(authMiddleware);
 userRouter.get("/api/users/current", userController.get);
 userRouter.patch("/api/users/current", userController.update);
 
-// contact route
-userRouter.post("/api/contacts", contactController.create);
-userRouter.get("/api/contacts/:contactId", contactController.get);
-userRouter.put("/api/contacts/:contactId", contactController.update);
-userRouter.get("/api/contacts", contactController.search);
-userRouter.delete("/api/contacts/:contactId", contactController.remove);
+// product route
+userRouter.post(
+  "/api/products",
+  rbacMiddleware("MERCHANT"),
+  productController.create,
+);
+userRouter.put(
+  "/api/products/:productId",
+  rbacMiddleware("MERCHANT"),
+  productController.update,
+);
+userRouter.delete(
+  "/api/products/:productId",
+  rbacMiddleware("MERCHANT"),
+  productController.remove,
+);
 
-// address route
-userRouter.post("/api/contacts/:contactId/addresses", addressController.create);
-userRouter.get("/api/contacts/:contactId/addresses", addressController.list);
-userRouter.get("/api/contacts/:contactId/addresses/:addressId", addressController.get);
-userRouter.put("/api/contacts/:contactId/addresses/:addressId", addressController.update);
-userRouter.delete("/api/contacts/:contactId/addresses/:addressId", addressController.remove);
+// order route
 
-export {
-  userRouter
-}
+export { userRouter };

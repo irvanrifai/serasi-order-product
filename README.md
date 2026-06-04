@@ -9,6 +9,8 @@
 
 `npx prisma migrate dev` for execute all schema
 
+`npx prisma db seed` for execute seeder
+
 # running app
 `node src/main.js`
 

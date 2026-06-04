@@ -1,10 +1,10 @@
-import contactService from "../service/contact-service.js";
+import productService from "../service/product-service.js";
 
 const create = async (req, res, next) => {
   try {
     const user = req.user;
     const request = req.body;
-    const result = await contactService.create(user, request);
+    const result = await productService.create(user, request);
     res.status(200).json({
       data: result
     });
@@ -15,9 +15,8 @@ const create = async (req, res, next) => {
 
 const get = async (req, res, next) => {
   try {
-    const user = req.user;
-    const contactId = req.params.contactId;
-    const result = await contactService.get(user, contactId);
+    const productId = req.params.productId;
+    const result = await productService.get(productId);
     res.status(200).json({
       data: result
     });
@@ -29,10 +28,10 @@ const get = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     const user = req.user;
-    const contactId = req.params.contactId;
+    const productId = req.params.productId;
     const request = req.body;
-    request.id = contactId;
-    const result = await contactService.update(user, request);
+    request.id = productId;
+    const result = await productService.update(user, request);
     res.status(200).json({
       data: result
     });
@@ -43,15 +42,12 @@ const update = async (req, res, next) => {
 
 const search = async (req, res, next) => {
   try {
-    const user = req.user;
     const request = {
       name: req.query.name,
-      email: req.query.email,
-      phone: req.query.phone,
       page: req.query.page,
       size: req.query.size
     };
-    const result = await contactService.search(user, request);
+    const result = await productService.search(request);
     res.status(200).json({
       data : result.data,
       paging: result.paging
@@ -64,8 +60,8 @@ const search = async (req, res, next) => {
 const remove = async (req, res, next) => {
   try {
     const user = req.user;
-    const contactId = req.params.contactId;
-    await contactService.remove(user, contactId);
+    const productId = req.params.productId;
+    await productService.remove(user, productId);
     res.status(200).json({
       data: "OK"
     });

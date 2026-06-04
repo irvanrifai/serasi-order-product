@@ -3,3 +3,7 @@ node_modules
 .env
 
 /generated/prisma
+
+.vscode
+.idea
+.DS_Store

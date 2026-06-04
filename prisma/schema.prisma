@@ -15,41 +15,50 @@ datasource db {
 }
 
 model User {
-  username String  @id @db.Char(100)
-  password String  @db.Char(100)
-  name     String  @db.Char(100)
-  token    String? @db.Char(100)
+  id         Int       @id @default(autoincrement())
+  name       String    @db.Char(100)
+  email      String    @db.Char(100)
+  username   String    @db.Char(100)
+  password   String    @db.Char(100)
+  token      String?   @db.Char(100)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
 
-  contacts Contact[]
+  orders Order[]
 
   @@map("users")
 }
 
-model Contact {
-  id         Int     @id @default(autoincrement())
-  first_name String  @db.Char(100)
-  last_name  String? @db.Char(100)
-  email      String? @db.Char(200)
-  phone      String? @db.Char(20)
-  username   String  @db.Char(100)
+model Product {
+  sku         Int       @id @default(autoincrement())
+  name        String    @db.Char(255)
+  description String?   @db.Text()
+  base_price  Decimal   @db.Decimal(10, 2)
+  stock_qty   Int       @db.Int()
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
 
-  user User @relation(fields: [username], references: [username])
+  orders Order[]
 
-  addresses Address[]
-
-  @@map("contacts")
+  @@map("products")
 }
 
-model Address {
-  id          Int     @id @default(autoincrement())
-  street      String? @db.Char(255)
-  city        String? @db.Char(100)
-  province    String? @db.Char(100)
-  country     String  @db.Char(100)
-  postal_code String  @db.Char(10)
-  contact_id  Int
+model Order {
+  id           Int       @id @default(autoincrement())
+  order_number String    @db.Char(100)
+  user_id      Int       @db.Int()
+  product_id   Int       @db.Int()
+  quantity     Int       @db.Int()
+  total_amount Decimal   @db.Decimal(10, 2)
+  status       String    @db.Char(50)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  deleted_at   DateTime?
 
-  contact Contact @relation(fields: [contact_id], references: [id])
+  user    User    @relation(fields: [user_id], references: [id])
+  product Product @relation(fields: [product_id], references: [sku])
 
-  @@map("addresses")
+  @@map("orders")
 }

@@ -1,80 +1,95 @@
-import { getUserValidation, loginUserValidation, registerUserValidation, updateUserValidation } from "../validation/user-validation.js"
-import { prismaClient } from "../application/database.js"
-import { validate } from "../validation/validation.js"
-import { ResponseError } from "../error/response-error.js"
-import bcrypt from "bcrypt"
-import { v4 as uuid } from "uuid"
+import {
+  getUserValidation,
+  loginUserValidation,
+  registerUserValidation,
+  updateUserValidation,
+} from "../validation/user-validation.js";
+import { prismaClient } from "../application/database.js";
+import { validate } from "../validation/validation.js";
+import { ResponseError } from "../error/response-error.js";
+import bcrypt from "bcrypt";
+import { v4 as uuid } from "uuid";
+import jwt from "jsonwebtoken";
 
 const register = async (request) => {
   const user = validate(registerUserValidation, request);
-  
+
   const countUserExists = await prismaClient.user.count({
     where: {
-      username: user.username
-    }
+      OR: [{ username: user.username }, { email: user.email }],
+    },
   });
-  
+
   if (countUserExists > 0) {
-    throw new ResponseError(400, "Username already exists");
+    throw new ResponseError(400, "Username or email already exists");
   }
   user.password = await bcrypt.hash(user.password, 10);
 
   return prismaClient.user.create({
     data: user,
     select: {
+      name: true,
       username: true,
-      name: true
-    }
+      email: true,
+    },
   });
-}
+};
 
 const login = async (request) => {
   const loginRequest = validate(loginUserValidation, request);
 
-  const user = await prismaClient.user.findUnique({
+  const user = await prismaClient.user.findFirst({
     where: {
-      username: loginRequest.username
+      OR: [
+        { username: loginRequest.username_or_email },
+        { email: loginRequest.username_or_email },
+      ],
     },
     select: {
       username: true,
-      password: true
-    }
+      email: true,
+      password: true,
+    },
   });
 
   if (!user) {
-    throw new ResponseError(401, "Username or password wrong");
+    throw new ResponseError(401, "Wrong credentials");
   }
 
-  const isPasswordValid = await bcrypt.compare(loginRequest.password, user.password);
+  const isPasswordValid = await bcrypt.compare(
+    loginRequest.password,
+    user.password,
+  );
   if (!isPasswordValid) {
-    throw new ResponseError(401, "Username or password wrong");
+    throw new ResponseError(401, "Wrong credentials");
   }
 
-  const token = uuid().toString();
-  return await prismaClient.user.update({
-    data: {
-      token: token
+  const jwtSecret = process.env.JWT_SECRET_KEY;
+  const token = jwt.sign(
+    {
+      name: user.name,
+      username: user.username,
+      role: user.role,
     },
-    where: {
-      username: user.username
-    }, 
-    select: {
-      token: true
-    }
-  });
-}
+    jwtSecret,
+    { expiresIn: "24h" },
+  );
+
+  return { token };
+};
 
 const get = async (username) => {
   username = validate(getUserValidation, username);
 
   const user = await prismaClient.user.findUnique({
     where: {
-      username: username
+      username: username,
     },
     select: {
       username: true,
-      name: true
-    }
+      email: true,
+      name: true,
+    },
   });
 
   if (!user) {
@@ -82,15 +97,15 @@ const get = async (username) => {
   }
 
   return user;
-}
+};
 
-const update = async (  request) => {
+const update = async (request) => {
   const user = validate(updateUserValidation, request);
 
   const userExists = await prismaClient.user.count({
     where: {
-      username: user.username
-    }
+      username: user.username,
+    },
   });
 
   if (!userExists) {
@@ -106,48 +121,45 @@ const update = async (  request) => {
     data.name = user.name;
   }
 
-  return prismaClient.user.update({
-    where: {
-      username: user.username
-    },
-    data: data,
-    select: {
-      username: true,
-      name: true
+  if (user.email) {
+    // check if email already exists
+    const countEmailExists = await prismaClient.user.count({
+      where: {
+        email: user.email,
+        username: {
+          not: user.username,
+        },
+      },
+    });
+
+    if (countEmailExists > 0) {
+      throw new ResponseError(400, "Email already exists");
     }
-  });
-}
+    
+    data.email = user.email;
+  }
 
-const logout = async (username) => {
-  username = validate(getUserValidation, username);
-
-  const user = await prismaClient.user.findUnique({
-    where: {
-      username: username
-    }
-  });
-
-  if (!user) {
-    throw new ResponseError(404, "User not found");
+  if (user.phone) {
+    data.phone = user.phone;
   }
 
   return prismaClient.user.update({
     where: {
-      username: username
+      username: user.username,
     },
-    data: {
-      token: null
-    },
+    data: data,
     select: {
-      username: true
-    }
+      username: true,
+      name: true,
+      email: true,
+      phone: true,
+    },
   });
-}
+};
 
 export default {
   register,
   login,
   get,
   update,
-  logout
-}
+};

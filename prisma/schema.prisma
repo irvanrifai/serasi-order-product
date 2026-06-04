@@ -10,55 +10,89 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  CUSTOMER
+  MERCHANT
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
 model User {
-  id         Int       @id @default(autoincrement())
-  name       String    @db.Char(100)
-  email      String    @db.Char(100)
-  username   String    @db.Char(100)
-  password   String    @db.Char(100)
-  token      String?   @db.Char(100)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role     @default(CUSTOMER)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  is_deleted Boolean  @default(false)
 
-  orders Order[]
+  // Relasi
+  products Product[] @relation("MerchantProducts")
+  orders   Order[]   @relation("CustomerOrders")
 
+  @@index([email])
   @@map("users")
 }
 
 model Product {
-  sku         Int       @id @default(autoincrement())
-  name        String    @db.Char(255)
-  description String?   @db.Text()
-  base_price  Decimal   @db.Decimal(10, 2)
-  stock_qty   Int       @db.Int()
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  deleted_at  DateTime?
+  id          String   @id @default(uuid())
+  sku         String   @unique
+  name        String
+  description String?
+  price       Float
+  stock       Int
+  merchant_id String
+  merchant    User     @relation("MerchantProducts", fields: [merchant_id], references: [id])
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  is_deleted  Boolean  @default(false)
 
-  orders Order[]
+  orderItems OrderItem[]
 
+  @@index([name])
+  @@index([sku])
+  @@index([merchant_id])
   @@map("products")
 }
 
 model Order {
-  id           Int       @id @default(autoincrement())
-  order_number String    @db.Char(100)
-  user_id      Int       @db.Int()
-  product_id   Int       @db.Int()
-  quantity     Int       @db.Int()
-  total_amount Decimal   @db.Decimal(10, 2)
-  status       String    @db.Char(50)
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-  deleted_at   DateTime?
+  id      String @id @default(uuid())
+  user_id String
+  user    User   @relation("CustomerOrders", fields: [user_id], references: [id])
 
-  user    User    @relation(fields: [user_id], references: [id])
-  product Product @relation(fields: [product_id], references: [sku])
+  total_price     Float
+  admin_fee       Float       @default(0)
+  shipping_fee    Float       @default(0)
+  payment_method  String
+  status          OrderStatus @default(PENDING)
+  idempotency_key String?     @unique
 
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  items      OrderItem[]
+
+  @@index([user_id])
   @@map("orders")
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  order_id   String
+  order      Order    @relation(fields: [order_id], references: [id])
+  product_id String?
+  product    Product? @relation(fields: [product_id], references: [id])
+  quantity   Int
+  price      Float
+
+  @@map("order_items")
 }

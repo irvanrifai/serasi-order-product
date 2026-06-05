@@ -243,7 +243,14 @@ K24KLIK_ENV=production
 Seluruh sirkuit arsitektur aplikasi, database, message broker, hingga dashboard monitoring akan dibangun dan dijalankan secara otomatis hanya dengan satu komando:
 
 ```bash
-docker compose --build
+docker compose up --build
+
+```
+
+atau running di latar belakang
+
+```bash
+docker compose up -d
 
 ```
 

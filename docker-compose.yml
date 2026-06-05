@@ -4,15 +4,19 @@ services:
   postgres_db:
     image: postgres:15-alpine
     container_name: order-product-postgres-db
-    env_file:
-      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "${OUTER_POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - apps-network
-      - monitoring
+      apps-network:
+        aliases:
+          - "${POSTGRES_HOST}"
+      monitoring:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s

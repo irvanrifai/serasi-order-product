@@ -4,8 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 RUN npm ci
-COPY . .
 RUN npx prisma generate
+COPY . .
 
 # Stage 2: Runtime Production (Hanya menyalin berkas krusial, ukuran image < 150MB)
 FROM node:20-alpine AS runner
@@ -17,12 +17,13 @@ ENV APP_PORT=${APP_PORT}
 
 COPY package*.json ./
 # Hanya menginstal dependensi produksi saja
-RUN npm ci --only=production
+RUN npm ci
 
 # Menyalin hasil generate prisma client dan source code dari stage builder
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 
 EXPOSE ${APP_PORT}

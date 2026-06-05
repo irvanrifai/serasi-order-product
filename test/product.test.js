@@ -28,6 +28,9 @@ describe("Product API", () => {
   let merchantToken;
 
   beforeEach(async () => {
+    // Hapus sisa data terdahulu sebelum membuat baru
+    await removeUserByUsername(MERCHANT.username);
+
     await createUser(MERCHANT);
     const loginResponse = await loginUser({
       username_or_email: MERCHANT.username,
@@ -133,8 +136,9 @@ describe("Product API", () => {
       searchResponse.body.data.find((product) => product.id === productId),
     ).toBeUndefined();
   });
+
+  afterAll(async () => {
+    await prismaClient.$disconnect();
+  });
 });
 
-afterAll(async () => {
-  await prismaClient.$disconnect();
-});

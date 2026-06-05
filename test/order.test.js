@@ -42,14 +42,6 @@ const ORDER_PRODUCTS = [
   },
 ];
 
-const createProduct = async (token, product) => {
-  const response = await supertest(web)
-    .post("/api/products")
-    .set("Authorization", `Bearer ${token}`)
-    .send(product);
-  return response.body.data;
-};
-
 const createOrder = async ({ token, idempotencyKey, items }) => {
   return supertest(web)
     .post("/api/orders")
@@ -61,18 +53,25 @@ const createOrder = async ({ token, idempotencyKey, items }) => {
 describe("Order API", () => {
   let merchantToken;
   let customerToken;
-  let products;
+  let products = [];
 
-  beforeEach(async () => {
-    await createUser(MERCHANT);
+  beforeAll(async () => {
+    // 1. PEMBERSIHAN AWAL: Hapus dulu user dengan username ini jika sisa test lalu masih ada
+    await removeUserByUsername(MERCHANT.username);
+    await removeUserByUsername(CUSTOMER.username);
+
+    // 2. Baru buat User Merchant dan Customer dengan aman
+    const merchant = await createUser(MERCHANT);
     await createUser(CUSTOMER);
 
+    // 3. Ambil token otentikasi via login
     merchantToken = (
       await loginUser({
         username_or_email: MERCHANT.username,
         password: MERCHANT.password,
       })
     ).body.data.token;
+
     customerToken = (
       await loginUser({
         username_or_email: CUSTOMER.username,
@@ -80,17 +79,40 @@ describe("Order API", () => {
       })
     ).body.data.token;
 
+    // 4. Buat produk pakai Prisma cukup SEKALI saja
     products = [];
-    for (const product of ORDER_PRODUCTS) {
-      products.push(await createProduct(merchantToken, product));
+    for (const prod of ORDER_PRODUCTS) {
+      const createdProd = await prismaClient.product.create({
+        data: {
+          sku: prod.sku,
+          name: prod.name,
+          description: prod.description,
+          price: prod.price,
+          stock: prod.stock,
+          // Ganti merchantId mentah dengan objek relation connect bawaan Prisma
+          merchant: {
+            connect: {
+              id: merchant.id,
+            },
+          },
+        },
+      });
+      products.push(createdProd);
     }
   });
 
+  // Di setiap akhir case, kita cukup bersihkan data orderan saja agar stock/state order kembali fresh
   afterEach(async () => {
     await removeOrdersByUserUsername(CUSTOMER.username);
-    await removeProductsByMerchantUsername(MERCHANT.username);
+  });
+
+  // Hancurkan semua data secara kumulatif di paling akhir pengujian file ini
+  afterAll(async () => {
     await removeUserByUsername(CUSTOMER.username);
     await removeUserByUsername(MERCHANT.username);
+    await removeOrdersByUserUsername(CUSTOMER.username);
+    await removeProductsByMerchantUsername(MERCHANT.username);
+    await prismaClient.$disconnect();
   });
 
   it("should create an order and include payment_method", async () => {
@@ -164,8 +186,4 @@ describe("Order API", () => {
     expect(response.body.data.items[0].product.id).toBe(products[1].id);
     expect(response.body.data.payment_method).toBe("QRIS");
   });
-});
-
-afterAll(async () => {
-  await prismaClient.$disconnect();
 });

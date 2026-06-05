@@ -146,8 +146,9 @@ describe("User API", () => {
     expect(response.status).toBe(400);
     expect(response.body.errors).toBeDefined();
   });
+  
+  afterAll(async () => {
+    await prismaClient.$disconnect();
+  });
 });
 
-afterAll(async () => {
-  await prismaClient.$disconnect();
-});

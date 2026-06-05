@@ -12,11 +12,12 @@ export const createUser = async ({
   name = "Test User",
   role = "CUSTOMER",
 } = {}) => {
+  const saltRounds = process.env.NODE_ENV === "test" ? 1 : 10;
   return prismaClient.user.create({
     data: {
       username,
       email,
-      password: await bcrypt.hash(password, 10),
+      password: await bcrypt.hash(password, saltRounds),
       name,
       role,
     },

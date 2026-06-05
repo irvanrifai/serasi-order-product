@@ -1,0 +1,82 @@
+groups:
+  - name: order_product_alerts
+    rules:
+      # High CPU Usage 
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Usage on {{ $labels.instance }}"
+          description: "CPU usage is above 80% for more than 2 minutes."
+
+      # Critical CPU Usage
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical CPU Usage on {{ $labels.instance }}"
+          description: "CPU usage is above 95% for more than 1 minute!"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory Usage on {{ $labels.instance }}"
+          description: "Memory usage is above 85% for 2 minutes."
+
+      # Disk Space Low 
+      - alert: DiskSpaceLow
+        expr: node_filesystem_avail_bytes{mountpoint="/var"} / node_filesystem_size_bytes{mountpoint="/var"} * 100 < 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low Disk Space on {{ $labels.instance }}"
+          description: "Available disk space is below 20%."
+
+      # Container Down
+      - alert: ContainerDown
+        expr: absent(container_last_seen)
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container Missing"
+          description: "A container is not detected for more than 60 seconds."
+
+      # Container High Memory
+      - alert: ContainerHighMemory
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes * 100 > 85
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory Usage in Container {{ $labels.container }}"
+          description: "Memory usage in container {{ $labels.container }} is above 85% for 3 minutes."
+
+      # Target Down 
+      - alert: TargetDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Target Down: {{ $labels.instance }}"
+          description: "A scrape target has been down for more than 1 minute."
+
+      # High Container CPU
+      - alert: HighContainerCPU
+        expr: rate(container_cpu_usage_seconds_total[5m]) * 100 > 70
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Usage in Container {{ $labels.container }}"
+          description: "CPU usage in container {{ $labels.container }} is above 70% for 5 minutes."

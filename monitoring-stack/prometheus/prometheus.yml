@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    env: 'production'
+    app: 'order-product-api'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:${OUTER_ALERTMANAGER_PORT}
+
+rule_files:
+  - "rules.yml"
+
+scrape_configs:
+  - job_name: 'order-product-api-monitoring'
+    static_configs:
+      - targets: 
+          - 'prometheus:${OUTER_PROMETHEUS_PORT}'
+          - 'node-exporter:${OUTER_NODE_EXPORTER_PORT}'
+          - 'cadvisor:${OUTER_CADVISOR_PORT}'
+          - 'alertmanager:${OUTER_ALERTMANAGER_PORT}'
+          - 'redis-exporter:${OUTER_REDIS_EXPORTER_PORT}'

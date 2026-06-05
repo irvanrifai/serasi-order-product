@@ -1,115 +1,105 @@
-# User Api Spec
+# User API Spec
 
-## Register user API
-- Endpoint : POST /api/users
-- Request Body : 
+## Register user
+- Endpoint: POST /api/users/register
+- Request Body:
 ```json
 {
-  "username" : "irvan",
-  "password" : "rifai$$",
-  "name" : "Irvan Rifai"
+  "username": "irvan",
+  "email": "irvan@example.com",
+  "password": "rifai$$",
+  "name": "Irvan Rifai"
 }
 ```
-- Response Body Succes :
+- Response Body Success:
 ```json
 {
-  "data" : {
-    "username" : "irvan",
-    "name" : "Irvan Rifai"
+  "data": {
+    "username": "irvan",
+    "email": "irvan@example.com",
+    "name": "Irvan Rifai"
   }
 }
 ```
-- Response Body Error :
+- Response Body Error:
 ```json
 {
-  "errors" : "Username already registered"
+  "errors": "Username or email already exists"
 }
 ```
 
-## Login user API
-- Endpoint : POST /api/users/login
-- Request Body : 
+## Login user
+- Endpoint: POST /api/users/login
+- Request Body:
 ```json
 {
-  "username" : "irvan",
-  "password" : "rifai$$",
+  "username_or_email": "irvan",
+  "password": "rifai$$"
 }
 ```
-- Response Body Succes :
+- Response Body Success:
 ```json
 {
-  "data" : {
-    "token" : "blablabalball2390r32"
+  "data": {
+    "token": "eyJhbGciOi..."
   }
 }
 ```
-- Response Body Error :
+- Response Body Error:
 ```json
 {
-  "errors" : "username or password wrong"
+  "errors": "Wrong credentials"
 }
 ```
 
-## Update user API
-- Endpoint : PATCH /api/users/current
-- Headers : 
-  - Authorization : "${token}"
-- Request Body : 
+## Get current user
+- Endpoint: GET /api/users/current
+- Headers:
+  - Authorization: "Bearer ${token}"
+- Response Body Success:
 ```json
 {
-  "name" : "Irvan Rif", //optional
-  "password" : "rifai" //optional
-}
-```
-- Response Body Succes :
-```json
-{
-  "data" : {
-    "name" : "Irvan Rif",
-    "password" : "rifai"
+  "data": {
+    "username": "irvan",
+    "email": "irvan@example.com",
+    "name": "Irvan Rifai"
   }
 }
 ```
-- Response Body Error :
+- Response Body Error:
 ```json
 {
-  "errors" : "name length max 100 character"
+  "errors": "Unauthorized"
 }
 ```
 
-## Get user API
-- Endpoint : GET /api/users/current
-- Headers : 
-  - Authorization : "${token}"
-- Response Body Succes :
+## Update current user
+- Endpoint: PATCH /api/users/current
+- Headers:
+  - Authorization: "Bearer ${token}"
+- Request Body:
 ```json
 {
-  "data" : {
-    "name" : "Irvan Rif",
-    "password" : "rifai"
+  "name": "Irvan Rifai",
+  "email": "irvan.updated@example.com",
+  "password": "newpassword",
+  "phone": "081234567890"
+}
+```
+- Response Body Success:
+```json
+{
+  "data": {
+    "username": "irvan",
+    "name": "Irvan Rifai",
+    "email": "irvan.updated@example.com",
+    "phone": "081234567890"
   }
 }
 ```
-- Response Body Error :
+- Response Body Error:
 ```json
 {
-  "errors" : "Unauthorized"
-}
-```
-
-## Logout user API
-- Endpoint : DELETE /api/users/logout
-- Headers : 
-  - Authorization : "${token}"
-- Response Body Succes :
-```json
-{
-  "data" : "OK"
-}
-```
-- Response Body Error :
-```json
-{
-  "errors" : "Unauthorized"
+  "errors": "Email already exists"
 }
 ```

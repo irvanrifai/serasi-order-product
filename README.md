@@ -121,7 +121,7 @@ Lihat detail lengkap: [logic-problem-solving/system-design-thinking/system-desig
 
 ```
 
-serasi-autoraya/order-product/
+order-product/
 ├── docs/                           # API Documentation & Specs
 │   ├── user.md                     # User API specification
 │   ├── product.md                  # Product API specification
@@ -238,12 +238,19 @@ K24KLIK_ENV=production
 
 ### Step 3: Pilihan Cara Menjalankan Aplikasi
 
-#### Opsi A: Menggunakan Docker Compose (Sangat Direkomendasikan 🚀)
+#### Opsi A: Menggunakan Docker Compose (Sangat Direkomendasikan)
 
 Seluruh sirkuit arsitektur aplikasi, database, message broker, hingga dashboard monitoring akan dibangun dan dijalankan secara otomatis hanya dengan satu komando:
 
 ```bash
-docker compose --env-file .env up --build
+docker compose up --build
+
+```
+
+atau running di latar belakang
+
+```bash
+docker compose up -d
 
 ```
 
@@ -449,5 +456,5 @@ Gunakan rangkuman komando taktis di bawah ini untuk keperluan manajemen pengemba
 
 ## Author
 
-* **Irvan Rifai** - Lead Backend Developer
+* **Irvan Rifai** - Software Engineer
 * **Project Status:** Active Assessment & Production Ready (2026)

@@ -1,6 +1,7 @@
 import { prismaClient } from "../application/database.js";
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response-error.js";
+import { orderQueue } from "../queue/order-queue.js";
 import {
   createOrderValidation,
   getOrderValidation,
@@ -73,6 +74,20 @@ const create = async (user, request, idempotencyKey) => {
           },
         },
       },
+    });
+
+    // Daftarkan tugas ke antrean utama Redis Queue
+    await orderQueue.add('processOrderAssets', {
+      orderId: newOrder.id,
+      userId: user.id,
+      customerEmail: user.email,
+      totalPrice: newOrder.total_price
+    }, {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 5000 // Jeda awal 5 detik, meningkat eksponensial di tiap percobaan gagal
+      }
     });
 
     return newOrder;

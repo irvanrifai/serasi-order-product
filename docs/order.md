@@ -4,7 +4,7 @@
 - Endpoint: POST /api/orders
 - Headers:
   - Authorization: "Bearer ${token}"
-  - x-idempotency-key: "<uuid>"
+  - x-idempotency-key: "e3c9b7f1-7234-4bca-bc08-62d7c5ba84f9"
 - Required role: CUSTOMER
 - Request Body:
 ```json
@@ -13,10 +13,6 @@
   "items": [
     {
       "product_id": 4,
-      "quantity": 3
-    },
-    {
-      "product_id": 5,
       "quantity": 3
     }
   ]
@@ -29,24 +25,24 @@
     "id": 1,
     "user_id": 10,
     "payment_method": "QRIS",
-    "total_price": 90000,
+    "total_price": 45000,
     "admin_fee": 0,
     "shipping_fee": 0,
     "status": "PENDING",
-    "idempotency_key": "e3c9b7f1-...",
-    "created_at": "2026-06-05T00:00:00.000Z",
-    "updated_at": "2026-06-05T00:00:00.000Z",
+    "idempotency_key": "e3c9b7f1-7234-4bca-bc08-62d7c5ba84f9",
+    "created_at": "2026-06-05T06:00:00.000Z",
+    "updated_at": "2026-06-05T06:00:00.000Z",
     "items": [
       {
         "id": 1,
         "order_id": 1,
         "product_id": 4,
         "quantity": 3,
-        "price": 30000,
+        "price": 15000,
         "product": {
           "id": 4,
-          "sku": "PRODUCTS-001",
-          "name": "Produk A"
+          "sku": "PRODUCTS-123456789",
+          "name": "Produk Bingkisan"
         }
       }
     ]
@@ -60,24 +56,24 @@
     "id": 1,
     "user_id": 10,
     "payment_method": "QRIS",
-    "total_price": 90000,
+    "total_price": 45000,
     "admin_fee": 0,
     "shipping_fee": 0,
     "status": "PENDING",
-    "idempotency_key": "e3c9b7f1-...",
-    "created_at": "2026-06-05T00:00:00.000Z",
-    "updated_at": "2026-06-05T00:00:00.000Z",
+    "idempotency_key": "e3c9b7f1-7234-4bca-bc08-62d7c5ba84f9",
+    "created_at": "2026-06-05T06:00:00.000Z",
+    "updated_at": "2026-06-05T06:00:00.000Z",
     "items": [
       {
         "id": 1,
         "order_id": 1,
         "product_id": 4,
         "quantity": 3,
-        "price": 30000,
+        "price": 15000,
         "product": {
           "id": 4,
-          "sku": "PRODUCTS-001",
-          "name": "Produk A"
+          "sku": "PRODUCTS-123456789",
+          "name": "Produk Bingkisan"
         }
       }
     ]

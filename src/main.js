@@ -1,6 +1,7 @@
 import { logger } from "./application/logging.js";
 import { web } from "./application/web.js";
 import { configDotenv } from "dotenv";
+import "./queue/order-queue.js";
 configDotenv();
 
 web.listen(process.env.APP_PORT, () => {

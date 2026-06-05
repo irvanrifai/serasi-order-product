@@ -15,5 +15,5 @@
 `node src/main.js`
 
 # test app
-
-
+`npm run test` for all
+`npx jest test/order.test.js --runInBand` for specific

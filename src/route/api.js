@@ -1,6 +1,7 @@
 import express from "express";
 import userController from "../controller/user-controller.js";
 import productController from "../controller/product-controller.js";
+import orderController from "../controller/order-controller.js";
 import { authMiddleware } from "../middleware/auth-middleware.js";
 import { rbacMiddleware } from "../middleware/rbac-middleware.js";
 
@@ -29,5 +30,20 @@ userRouter.delete(
 );
 
 // order route
+userRouter.post(
+  "/api/orders",
+  rbacMiddleware("CUSTOMER"),
+  orderController.create,
+);
+userRouter.get(
+  "/api/orders",
+  rbacMiddleware("CUSTOMER"),
+  orderController.history,
+);
+userRouter.get(
+  "/api/orders/:orderId",
+  rbacMiddleware("CUSTOMER"),
+  orderController.get,
+);
 
 export { userRouter };

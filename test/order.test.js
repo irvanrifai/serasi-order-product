@@ -1,0 +1,171 @@
+import supertest from "supertest";
+import { web } from "../src/application/web.js";
+import {
+  createUser,
+  loginUser,
+  removeOrdersByUserUsername,
+  removeProductsByMerchantUsername,
+  removeUserByUsername,
+} from "./test-util.js";
+import { prismaClient } from "../src/application/database.js";
+
+const MERCHANT = {
+  username: "merchant-order-test",
+  email: "merchant-order-test@example.com",
+  password: "testing",
+  name: "Merchant Order",
+  role: "MERCHANT",
+};
+
+const CUSTOMER = {
+  username: "customer-order-test",
+  email: "customer-order-test@example.com",
+  password: "testing",
+  name: "Customer Order",
+  role: "CUSTOMER",
+};
+
+const ORDER_PRODUCTS = [
+  {
+    sku: "ORDER-PROD-001",
+    name: "Order Product A",
+    description: "Description A",
+    price: 10000,
+    stock: 5,
+  },
+  {
+    sku: "ORDER-PROD-002",
+    name: "Order Product B",
+    description: "Description B",
+    price: 20000,
+    stock: 3,
+  },
+];
+
+const createProduct = async (token, product) => {
+  const response = await supertest(web)
+    .post("/api/products")
+    .set("Authorization", `Bearer ${token}`)
+    .send(product);
+  return response.body.data;
+};
+
+const createOrder = async ({ token, idempotencyKey, items }) => {
+  return supertest(web)
+    .post("/api/orders")
+    .set("Authorization", `Bearer ${token}`)
+    .set("x-idempotency-key", idempotencyKey)
+    .send({ payment_method: "QRIS", items });
+};
+
+describe("Order API", () => {
+  let merchantToken;
+  let customerToken;
+  let products;
+
+  beforeEach(async () => {
+    await createUser(MERCHANT);
+    await createUser(CUSTOMER);
+
+    merchantToken = (
+      await loginUser({
+        username_or_email: MERCHANT.username,
+        password: MERCHANT.password,
+      })
+    ).body.data.token;
+    customerToken = (
+      await loginUser({
+        username_or_email: CUSTOMER.username,
+        password: CUSTOMER.password,
+      })
+    ).body.data.token;
+
+    products = [];
+    for (const product of ORDER_PRODUCTS) {
+      products.push(await createProduct(merchantToken, product));
+    }
+  });
+
+  afterEach(async () => {
+    await removeOrdersByUserUsername(CUSTOMER.username);
+    await removeProductsByMerchantUsername(MERCHANT.username);
+    await removeUserByUsername(CUSTOMER.username);
+    await removeUserByUsername(MERCHANT.username);
+  });
+
+  it("should create an order and include payment_method", async () => {
+    const response = await createOrder({
+      token: customerToken,
+      idempotencyKey: "order-key-1",
+      items: [{ product_id: products[0].id, quantity: 2 }],
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.payment_method).toBe("QRIS");
+    expect(response.body.data.total_price).toBe(20000);
+    expect(response.body.data.items.length).toBe(1);
+    expect(response.body.data.items[0].product.id).toBe(products[0].id);
+  });
+
+  it("should return the same order when the same idempotency key is reused", async () => {
+    const firstResponse = await createOrder({
+      token: customerToken,
+      idempotencyKey: "order-key-2",
+      items: [{ product_id: products[0].id, quantity: 1 }],
+    });
+
+    expect(firstResponse.status).toBe(200);
+
+    const secondResponse = await createOrder({
+      token: customerToken,
+      idempotencyKey: "order-key-2",
+      items: [{ product_id: products[0].id, quantity: 1 }],
+    });
+
+    expect(secondResponse.status).toBe(200);
+    expect(secondResponse.body.data.id).toBe(firstResponse.body.data.id);
+    expect(secondResponse.body.data.idempotency_key).toBe(
+      firstResponse.body.data.idempotency_key,
+    );
+  });
+
+  it("should return order history for the customer", async () => {
+    await createOrder({
+      token: customerToken,
+      idempotencyKey: "order-key-3",
+      items: [{ product_id: products[0].id, quantity: 1 }],
+    });
+
+    const response = await supertest(web)
+      .get("/api/orders")
+      .set("Authorization", `Bearer ${customerToken}`)
+      .query({ page: 1, size: 10 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.length).toBeGreaterThanOrEqual(1);
+    expect(response.body.paging.page).toBe(1);
+    expect(response.body.data[0].payment_method).toBe("QRIS");
+  });
+
+  it("should get order detail by id", async () => {
+    const createResponse = await createOrder({
+      token: customerToken,
+      idempotencyKey: "order-key-4",
+      items: [{ product_id: products[1].id, quantity: 2 }],
+    });
+
+    const orderId = createResponse.body.data.id;
+    const response = await supertest(web)
+      .get(`/api/orders/${orderId}`)
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.id).toBe(orderId);
+    expect(response.body.data.items[0].product.id).toBe(products[1].id);
+    expect(response.body.data.payment_method).toBe("QRIS");
+  });
+});
+
+afterAll(async () => {
+  await prismaClient.$disconnect();
+});

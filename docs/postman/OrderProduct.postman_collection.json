@@ -1,0 +1,775 @@
+{
+  "info": {
+    "_postman_id": "fa805e92-9733-4d8f-a421-b4ab7a15a24d",
+    "name": "Order Product",
+    "description": "Postman Collection for Auth User, Product Management and Order Management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "21481584"
+  },
+  "item": [
+    {
+      "name": "[User] Register",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('object');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\" : \"Irvan\",\n    \"username\" : \"irvan\",\n    \"email\" : \"ivan.rivai6921@gmail.com\",\n    \"password\" : \"{{user_password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users/register",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[User] Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response body token set to current token', () => {",
+              "    const responseJson = pm.response.json();",
+              "    const { data } = responseJson;",
+              " ",
+              "    pm.expect(data).to.ownProperty('token');",
+              "    pm.expect(data.token).to.not.equals('');",
+              " ",
+              "    pm.environment.set('token', data.token);",
+              "});",
+              "",
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('object');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username_or_email\" : \"irvanrifai\",\n    \"password\" : \"{{user_password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[User] Get Current Auth",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('object');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users/current",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "current"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[User] Update Current Auth",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('object');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\" : \"Irvan Rifa'iiii\",\n    \"email\" : \"ivan.rivai69@gmail.com\",\n    \"password\" : \"password\",\n    \"phone\" : \"082138109809\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users/current",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "current"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[Product] List and Search",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\" : \"Irvan Rifa'iiii\",\n    \"email\" : \"ivan.rivai69@gmail.com\",\n    \"password\" : \"password\",\n    \"phone\" : \"082138109809\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/products?name=Herbal",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "Herbal"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[Product] Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('object');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\" : \"Irvan Rifa'iiii\",\n    \"email\" : \"ivan.rivai69@gmail.com\",\n    \"password\" : \"password\",\n    \"phone\" : \"082138109809\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/products/3",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "3"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[Product] Create",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('object');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sku\" : \"PRODUCTS-123456789\",\n    \"name\" : \"Produk Bingkisan\",\n    \"price\" : 15000,\n    \"stock\" : 100\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/products",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[Product] Update",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('object');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sku\" : \"PRODUCT-4567\",\n    \"name\" : \"Produk Herbal banget\",\n    \"description\" : \"Lorem lorem yakss\",\n    \"price\" : 12000,\n    \"stock\" : 102\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/products/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[Product] Delete",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.equals('OK');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/products/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[Order] History",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sku\" : \"PRODUCT-4567\",\n    \"name\" : \"Produk Herbal banget\",\n    \"description\" : \"Lorem lorem yakss\",\n    \"price\" : 12000,\n    \"stock\" : 102\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/orders",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[Order] Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('response status code should have 200 value', () => {",
+              "   pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response Content-Type header should have application/json value', () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+              "});",
+              "",
+              "pm.test('response body should be an object', () => {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('response body should have correct property and value', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.ownProperty('data');",
+              "    pm.expect(responseJson.data).to.be.an('object');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/orders/4",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "orders",
+            "4"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "[Order] Create",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-idempotency-key",
+            "value": "506j394e-26ff-46e6-42e2c-151d12d22tgapaa",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"payment_method\" : \"QRIS\",\n    \"items\" : [\n        {\n            \"product_id\" : 4,\n            \"quantity\" : 3\n        },\n        {\n            \"product_id\" : 5,\n            \"quantity\" : 3\n        }\n    ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/orders",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

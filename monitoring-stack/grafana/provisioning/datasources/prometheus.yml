@@ -4,6 +4,6 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus:${OUTER_PROMETHEUS_PORT}
+    url: "http://prometheus:${OUTER_PROMETHEUS_PORT}"
     isDefault: true
     editable: false
